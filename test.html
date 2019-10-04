@@ -1,0 +1,82 @@
+<!doctype HTML>
+<html>
+	<head>
+		<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+		<script src='latteArt.js'></script>
+		<script>
+			$(()=>{
+				/*var r = new Rectangle({
+					width: 30,
+					height: 60,
+					x: 20,
+					y: 30,
+					color: "#0000ff",
+					alpha: 0.5
+				});*/
+				var r = new Rectangle(30,60);
+				r.setPosition(20,30);
+				r.setColor("#0000ff");
+				r.setAlpha("1");
+				r.draw();
+
+				var d = new Rectangle({
+					width: 60,
+					height: 30,
+					x: 20,
+					y: 30,
+					color: "#ff0000",
+					alpha: 0.5
+				});
+				d.draw();
+
+				var c = new Arc({
+					radius: 25,
+					x: 50,
+					y: 50,
+					endAngle: Math.PI,
+					color: "#00ff00",
+					alpha: 0.75,
+					style: "stroke",
+					lineWidth: 6,
+					connect: false
+				});
+				c.draw();
+
+				var reg = new Regular({
+					radius: 25,
+					count: 7,
+					x: 70,
+					y: 90,
+					color: "#ff00ff",
+					angle: Math.PI,
+					alpha: 0.8,
+					style: "stroke"
+				});
+				reg.draw();
+
+				var l = new Line({
+					start: [39,20],
+					end: [10,70],
+					color: "#00ffff",
+					lineWidth: 7
+				});
+				l.draw();
+
+				var rep = 0;
+
+				var iid = window.setInterval(mov,100)
+				function mov(){
+					rep ++;
+					r.set('x',r.get('x')+1);
+					if(rep >= 10)
+						clearInterval(iid);
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<!-- 300 x 150 -->
+		<canvas id="latte-art-container" width=400 height=480 style="border:1px solid black; width:400px; height:480px">
+		</canvas>
+	</body>
+</html>
