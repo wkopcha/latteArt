@@ -1,0 +1,151 @@
+<!doctype HTML>
+<html>
+	<head>
+		<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+		<script src='latteArt.js'></script>
+		<script>
+			/****************
+			 * GRAPHICS BY: *
+			 * Latte Art    *
+			 ****************/
+
+			$(()=>{
+				init();
+			})
+
+			const CONSTS = {
+				screen: {
+					x: 400,
+					y: 480
+				},
+				world: {
+					x: 10,
+					y: 12
+				},
+				unitRadius: 15
+			}
+
+			let PLAYER;
+			let ENEMIES = [];
+			let TURNS = 0;
+
+			function init(){
+				let spacer = CONSTS.screen.x/CONSTS.world.x;
+				for(let x=0; x<CONSTS.world.x-1; x++)
+					new Line([x*spacer + spacer,0],[x*spacer + spacer,CONSTS.screen.y]).draw();
+
+				spacer = CONSTS.screen.y/CONSTS.world.y;
+				for(let y=0; y<CONSTS.world.y-1; y++)
+					new Line([0,y*spacer + spacer],[CONSTS.screen.x,y*spacer + spacer]).draw();
+
+				PLAYER = new Player(0,0);
+
+				$(document).keydown((e)=>{
+					switch(e.which){
+						case 37: //Left
+							if(PLAYER.move(-1,0))
+								nextTurn();
+							break;
+						case 38: //Down
+							if(PLAYER.move(0,-1))
+								nextTurn();
+							break;
+						case 39: //Right
+							if(PLAYER.move(1,0))
+								nextTurn();
+							break;
+						case 40: //Up
+							if(PLAYER.move(0,1))
+								nextTurn();
+							break;
+						default:
+							return;
+					}
+				});
+			}
+
+			function nextTurn(){
+				for(let e of ENEMIES)
+					if(e.x == PLAYER.x && e.y == PLAYER.y)
+						return gameOver();
+
+				TURNS++;
+				$('#turnCtr').text(TURNS);
+
+				let coordx,coordy;
+				for(let x=0; x<TURNS; x++){
+					coordx = PLAYER.x;
+					coordy = PLAYER.y;
+					while(coordx == PLAYER.x && coordy == PLAYER.y){
+						coordx = Math.floor(Math.random() * CONSTS.world.x);
+						coordy = Math.floor(Math.random() * CONSTS.world.y);
+					}
+					ENEMIES.push(new ENEMY(coordx,coordy));
+				}
+			}
+
+			function gameOver(){
+				new Rectangle({
+					width: CONSTS.screen.x,
+					height: CONSTS.screen.y,
+					color: "#ff0000"
+				}).draw();
+
+				let t = new Text({
+					text: "Game Over",
+					font: "48px Roboto"
+				});
+				t.setPosition(CONSTS.screen.x/2 - t.getWidth()/2,100);
+				t.draw();
+
+				$(document).unbind('keydown');
+			}
+
+			function coordsToPx(x,y){
+				return [x*CONSTS.screen.x/CONSTS.world.x +  CONSTS.screen.x/CONSTS.world.x/2,y*CONSTS.screen.y/CONSTS.world.y +  CONSTS.screen.y/CONSTS.world.y/2];
+			}
+
+			function Player(x,y){
+				this.x = x;
+				this.y = y;
+				let sCoords = coordsToPx(x,y);
+				this.c = new Circle({
+					radius: CONSTS.unitRadius,
+					x: sCoords[0],
+					y: sCoords[1],
+					color: "#00ff00"
+				});
+				this.c.draw();
+
+				this.move = (x,y)=>{
+					if(this.x + x < 0 || this.x + x >= CONSTS.world.x || this.y + y < 0 || this.y + y >= CONSTS.world.y) return 0;
+
+					this.x += x;
+					this.y += y;
+					this.c.setPosition(this.c.get('x')+CONSTS.screen.x/CONSTS.world.x*x,this.c.get('y')+CONSTS.screen.y/CONSTS.world.y*y);
+
+					return 1;
+				};
+			}
+
+			function ENEMY(x,y){
+				this.x = x;
+				this.y = y;
+				let sCoords = coordsToPx(x,y);
+				this.c = new Circle({
+					radius: CONSTS.unitRadius,
+					x: sCoords[0],
+					y: sCoords[1],
+					color: "#ff0000"
+				});
+				this.c.draw();
+			}
+		</script>
+	</head>
+	<body>
+		Game originally created by Gibbs Robinson<br>
+		<canvas id="latte-art-container" width=400 height=480 style="border:1px solid black; width:400px; height:480px;float:left;">
+		</canvas>
+		<span>Turns: <span id='turnCtr'>0</span></span>
+	</body>
+</html>

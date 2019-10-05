@@ -1,0 +1,619 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Latte Art Documentation</title>
+		<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+		<meta charset="UTF-8">
+		<style>
+		body{
+			font-family: Helvetica,Sans-Sarif;
+			background-color:#ffeedd;
+			overflow: -moz-scrollbars-none;
+			-ms-overflow-style: none;
+		}
+		body::-webkit-scrollbar{
+			width: 0 !important
+		}
+		a{
+			color:#000;
+			text-decoration: none;
+		}
+		a:hover{
+			color:#555;
+		}
+		#container{
+			width:90vw;
+			margin-left:auto;
+			margin-right:auto;
+			margin-top:4vw;
+			margin-bottom:4vw;
+			background-color:#fff;
+			padding:1vw;
+			border-radius:15px;
+		}
+		.object{
+			margin-left:3vw;
+		}
+		.subset{
+			margin-left:2vw;
+		}
+		.arrow{
+			margin-right: 10px;
+			padding-top:5px;
+		}
+		.objectname{
+			cursor:pointer;
+		}
+		</style>
+		<script>
+			const int = "Internal use only";
+			const DEFS = {
+				alpha: "Transparency of shape (0 to 1 float)",
+				color: "Hex, rgb(), or rgba() string for color",
+				lineWidth: "If style is stroke, the width of the stroke",
+				style: "String which should be either 'solid' (solid fill) or 'stroke' (outline)",
+				x: "X coordinate of the shape (+ right)",
+				y: "Y coordinate of the shape (+ down)",
+				options: "Object used to replace properties"
+			};
+			const DATA = {
+				variables: {
+					Canvas: {
+						desc: "A variable representing the <canvas> with an id of 'latte-art-container'. The width & height attributes must be defined",
+						properties: {
+							context: int,
+							shapes: "Array of shapes to draw in order from back to front",
+							width: "Width of the canvas",
+							height: "Height of the canvas",
+						},
+						functions: {
+							update: {
+								args: "none",
+								desc: "Force the canvas to redraw all shapes"
+							}
+						}
+					}
+				},
+				objects: {
+					Arc: {
+						desc: "Used to make arcs",
+						constructors: [
+							{
+								args: {
+									radius: "Radius of the arc"
+								}
+							},
+							{
+								args: {
+									radius: "Radius of the arc",
+									startAngle: "Angle the arc starts at (radians, 0 = right)",
+									endAngle: "Angle the arc ends at (radians, 0 = right)",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							connect: "Boolean to tell if to connect the two endpoints of the arc (true = yes)",
+							endAngle: "Angle the arc ends at (radians, 0 = right)",
+							lineWidth: DEFS.lineWidth,
+							radius: "Radius of the arc",
+							startAngle: "Angle the arc starts at (radians, 0 = right)",
+							style: DEFS.style,
+							x: DEFS.x,
+							y: DEFS.y
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'radius',
+								'x',
+								'y'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								'radius',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the position of the arc to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Circle: {
+						desc: "Used to draw a circle AKA 360 degree arc",
+						constructors: [
+							{
+								args: {
+									radius: "Radius of the circle",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							lineWidth: DEFS.lineWidth,
+							radius: "Radius of the circle",
+							style: DEFS.style,
+							x: DEFS.x,
+							y: DEFS.y
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'radius',
+								'x',
+								'y'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								'radius',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the position of the circle to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Line: {
+						desc: "Used to draw a line between 2 points",
+						constructors: [
+							{
+								args: {
+									point1: "First array ordered pair ([x,y])",
+									point2: "Second array ordered pair ([x,y])",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							end: "The array ordered pair [x,y] to end the line",
+							lineWidth: DEFS.lineWidth,
+							start: "The array ordered pair [x,y] to start the line"
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'end',
+								'start'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								'end',
+								'start'
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Polygon: {
+						desc: "Used to draw a shape constructed from an array of points and given an offset",
+						constructors: [
+							{
+								args: {
+									points: "Array of array ordered pairs ([x,y]) used to define the shape",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							lineWidth: DEFS.lineWidth,
+							offset: "Object {x: ... , y: ...} to describe the offset of the first point of the shape",
+							points: "Array of array ordered pairs ([x,y]) used to define the shape",
+							style: DEFS.style
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								{
+									name: 'getPoint',
+									args: {
+										index: "Index of the point being accessed"
+									},
+									desc: "Retrive the point at the index <code>index</code>"
+								},
+								{
+									name: 'getPoints',
+									args: {},
+									desc: "Return the array of points"
+								}
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								{
+									name: 'addPoint',
+									args: {
+										point: 'Array ordered pair to add'
+									},
+									desc: "Adds a point to the end of the points array"
+								},
+								{
+									name: 'removePoint',
+									args: {
+										point: 'Array ordered pair to remove'
+									},
+									desc: "Removes a point from the points array"
+								},
+								{
+									name: 'removePoint',
+									args: {
+										index: 'Index of array ordered pair to remove'
+									},
+									desc: "Removes a point at index from the points array"
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Rectangle: {
+						desc: "Used to draw a rectangle",
+						constructors: [
+							{
+								args: {
+									width: "Width of the rectangle",
+									height: "Height of the rectangle",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							height: "Height of the rectangle",
+							lineWidth: DEFS.lineWidth,
+							style: DEFS.style,
+							width: "Width of the rectangle",
+							x: DEFS.x,
+							y: DEFS.y
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'height',
+								'width',
+								'x',
+								'y'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								{
+									name: 'setDimensions',
+									args: {
+										width: "Width of the rectangle",
+										height: "Height of the rectangle"
+									},
+									desc: 'Set the width & height of the rectangle to <code>width</code> & <code>height</code>)'
+								},
+								'height',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the position of the rectangle to (<code>x</code>,<code>y</code>)'
+								},
+								'width'
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Regular: {
+						desc: "Used to draw a regular polygon with a specified number of points",
+						constructors: [
+							{
+								args: {
+									count: "Number of points",
+									radius: "Radius of the polygon",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							angle: "The angle the polygon is rotated (radians, 0 = right)",
+							color: DEFS.color,
+							count: "The number of points in the polygon",
+							lineWidth: DEFS.lineWidth,
+							radius: "Radius of the polygon",
+							style: DEFS.style,
+							x: DEFS.x,
+							y: DEFS.y
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'count',
+								'radius',
+								'x',
+								'y'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								'radius',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the position of the circle to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Text: {
+						desc: "Used to write text",
+						constructors: [
+							{
+								args: {
+									text: "Text to be displayed",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							color: DEFS.color,
+							font: "The font size and font family of the text ('[size] [family]')",
+							lineWidth: DEFS.lineWidth,
+							style: DEFS.style,
+							text: "Text to be displayed",
+							x: DEFS.x,
+							y: DEFS.y
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'color',
+								'height',
+								'text',
+								'width',
+								'x',
+								'y'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'color',
+								'text',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the position of the rectangle to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					}
+				}
+			};
+
+			$(()=>{
+				let html = "";
+				if(DATA.variables){
+					//
+				}
+				if(DATA.objects){
+					$('#container').append('<div id="objects"><h1>Objects</h1></div>');
+					for(let object in DATA.objects){
+						html = "<span class='arrow' style='float:left'>&#9654;</span><h2 class='objectname' id='"+object+"'>"+object+"</h2><div class='object' id='object-"+object+"' style='display:none'>";
+						html += "<span class='desc'>"+DATA.objects[object].desc+"</span><br>";
+
+						//Generate constructor list
+						html += "<h3>Constructors</h3><div class='constructors subset'>";
+						for(let constr of DATA.objects[object].constructors){
+							html += "<div class='constructor'>";
+
+							//header
+							html += "<strong>"+object+"(";
+							for(let arg in constr.args)
+								html += arg+", ";
+							html = html.substring(0,html.length-2) + ")</strong>";
+
+							//explain list
+							html += "<ul>";
+							for(let arg in constr.args)
+								html += "<li>"+arg+": "+constr.args[arg]+"</li>";
+							html += "</ul></div>";
+						}
+						html += "</div>";
+
+						//Generate property list
+						html += "<h3>Properties</h3><div class='properties subset'><ul>";
+						for(let prop in DATA.objects[object].properties)
+							html += "<li><strong>"+prop+"</strong>: "+DATA.objects[object].properties[prop]+"</li>";
+						html += "</ul></div>";
+
+						//Generate function list
+						html += "<h3>Functions</h3><div class='functions subset'><h4>Accessors</h4><div class='accessors subset'><ul>";
+						for(let func of DATA.objects[object].functions.accessors){
+							html += "<li>";
+							if(typeof func != 'object'){
+								if(func == 'all')
+									html += "<strong>get(key)</strong>: Return the value of whatever property <code>key</code> is";
+								else
+									html += "<strong>get"+func.substring(0,1).toUpperCase()+func.substring(1)+"()</strong>: Return <code>"+func+"</code>";
+							}else{
+								html += "<strong>"+func.name+"(";
+								for(let arg in func.args)
+									html += arg + ", ";
+								html = html.substring(0,html.length-2)+")</strong>: "+func.desc;
+							}
+							html += "</li>";
+						}
+						html += "</ul></div>";
+
+						html += "<h4>Mutators</h4><div class='mutators subset'><ul>";
+						for(let func of DATA.objects[object].functions.mutators){
+							html += "<li>";
+							if(typeof func != 'object'){
+								if(func == 'all')
+									html += "<strong>set(key,value)</strong>: Set <code>key</code> to <code>value</code>";
+								else
+									html += "<strong>set"+func.substring(0,1).toUpperCase()+func.substring(1)+"(value)</strong>: Set <code>"+func+"</code> to <code>value</code>";
+							}else{
+								html += "<strong>"+func.name+"(";
+								for(let arg in func.args)
+									html += arg + ", ";
+								html = html.substring(0,html.length-2)+")</strong>: "+func.desc;
+							}
+							html += "</li>";
+						}
+						html += "</ul></div>";
+
+						html += "<h4>Other</h4><div class='misc subset'><ul>";
+						for(let func of DATA.objects[object].functions.misc){
+							html += "<li>";
+							if(typeof func != 'object'){
+								if(func == 'draw')
+									html += "<strong>draw()</strong>: Draw the shape to the canvas";
+								else if(func == 'moveZ')
+									html += "<strong>moveZ(amount)</strong>: Move the shape above or below other shapes <code>amount</code> times (+ infront, - behind)";
+								else if(func == 'getProperties')
+									html += "<strong>getProperties()</strong>: Return the list of modifiable properties that will affect the appearance of the shape";
+								else
+									html += "<strong>set"+func.substring(0,1).toUpperCase()+func.substring(1)+"(value)</strong>: Set "+func+" to <code>value</code>";
+							}else{
+								html += "<strong>"+func.name+"(";
+								for(let arg in func.args)
+									html += arg + ", ";
+								html = html.substring(0,html.length-2)+")</strong>: "+func.desc;
+							}
+							html += "</li>";
+						}
+						html += "</ul></div>";
+
+						html += "</div></div>";
+
+						$('#objects').append(html);
+					}
+				}
+
+
+				$('.objectname').click(function(){
+					if($(this).next().css('display') == 'none'){
+						$(this).next().css('display','block');
+						$(this).prev().html("&#9660;");
+					}
+					else{
+						$(this).next().css('display','none');
+						$(this).prev().html("&#9654;");
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div id="container">
+			<span style='font-size:3em'>Latte Art <a href='https://github.com/wkopcha/latteArt' style='font-size:0.333em;font-weight:bold' target='tab'>GitHub</a></span>
+		</div>
+	</body>
+</html>

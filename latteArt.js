@@ -1,4 +1,4 @@
-var Arc, Circle, Canvas, Line, Polygon, Rectangle, Regular;
+var Arc, Circle, Canvas, Line, Polygon, Rectangle, Regular, Text;
 
 document.addEventListener("DOMContentLoaded", function(){
 
@@ -50,15 +50,16 @@ document.addEventListener("DOMContentLoaded", function(){
 				width: w
 			};
 		}else
-			options = options || {width: DEFAULTS.width};
+			options = options || {};
 
+		options.width = options.width || (op && op.width) || DEFAULTS.width;
 		options.height = options.height || height || (op && op.height) || DEFAULTS.height;
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.x = options.x || (op && op.x) || DEFAULTS.x;
 		options.y = options.y || (op && op.y) || DEFAULTS.y;
-		options.style = options.style || DEFAULTS.style;
-		options.lineWidth = options.lineWidth || DEFAULTS.lineWidth;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
 
 		let PROPERTIES = ['alpha','color','height','lineWidth','style','width','x','y'];
 
@@ -182,14 +183,15 @@ document.addEventListener("DOMContentLoaded", function(){
 				radius: r
 			};
 		}else
-			options = options || {radius: DEFAULTS.radius};
+			options = options || {};
 
+		options.radius = options.radius || (op && op.radius) || Defaults.radius;
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.x = options.x || (op && op.x) || DEFAULTS.x;
 		options.y = options.y || (op && op.y) || DEFAULTS.y;
-		options.style = options.style || DEFAULTS.style;
-		options.lineWidth = options.lineWidth || DEFAULTS.lineWidth;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
 
 		let PROPERTIES = ['alpha','color','lineWidth','radius','style','x','y'];
 
@@ -300,17 +302,18 @@ document.addEventListener("DOMContentLoaded", function(){
 				radius: r
 			};
 		}else
-			options = options || {radius: DEFAULTS.radius};
+			options = options || {};
 
+		options.radius = options.radius || (op && op.radius) || DEFAULTS.radius;
 		options.startAngle = options.startAngle || startAngle || (op && op.startAngle) || DEFAULTS.startAngle;
 		options.endAngle = options.endAngle || endAngle || (op && op.endAngle) || DEFAULTS.endAngle;
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.x = options.x || (op && op.x) || DEFAULTS.x;
 		options.y = options.y || (op && op.y) || DEFAULTS.y;
-		options.style = options.style || DEFAULTS.style;
-		options.lineWidth = options.lineWidth || DEFAULTS.lineWidth;
-		options.connect = options.connect || false;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
+		options.connect = options.connect || (op && op.connect) || false;
 
 		let PROPERTIES = ['alpha','color','connect','endAngle','lineWidth','radius','startAngle','style','x','y'];
 
@@ -424,10 +427,11 @@ document.addEventListener("DOMContentLoaded", function(){
 				count: c
 			};
 		}else
-			options = options || {count: 3};
+			options = options || {};
 
-		options.angle = options.angle || op.angle || DEFUALTS.startAngle;
-		options.radius = options.radius || radius || op.radius || DEFAULTS.radius;
+		options.count = options.count || (op && op.count) || 3;
+		options.angle = options.angle || (op && op.angle) || DEFAULTS.startAngle;
+		options.radius = options.radius || radius || (op && op.radius) || DEFAULTS.radius;
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.x = options.x || (op && op.x) || DEFAULTS.x;
@@ -551,9 +555,10 @@ document.addEventListener("DOMContentLoaded", function(){
 				start: s
 			};
 		}else
-			options = options || {start: [0,0]};
+			options = options || {};
 
-		options.end = options.end || point2 || op.end || [1,1];
+		options.start = options.start || (op && op.start) || [0,0];
+		options.end = options.end || point2 || (op && op.end) || [1,1];
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
@@ -652,7 +657,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	}
 
 	Polygon = function(options,op){
-		if(Array.isArrey(options)){
+		if(Array.isArray(options)){
 			let p = options;
 			options = {
 				points: p
@@ -660,21 +665,24 @@ document.addEventListener("DOMContentLoaded", function(){
 		}else
 			options = options || {points: []};
 
-		options.points = options.points || [];
+		options.points = options.points || (op && op.points) || [];
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.style = options.style || (op && op.style) || DEFAULTS.style;
 		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
+		options.offset = options.offset || (op && op.offset) || {};
+		options.offset.x = options.offset.x || (op && op.offset.x) || DEFAULTS.x;
+		options.offset.y = options.offset.y || (op && op.offset.y) || DEFAULTS.y;
 
-		let PROPERTIES = ['alpha','color','lineWidth','points','style'];
+		let PROPERTIES = ['alpha','color','lineWidth','offset','points','style'];
 
 		this.__draw__ = ()=>{
 			Canvas.context.beginPath();
 			Canvas.context.globalAlpha = options.alpha;
 
-			Canvas.context.moveTo(options.points[0][0],options.points[0][1])
+			Canvas.context.moveTo(options.points[0][0]+options.offset.x,options.points[0][1]+options.offset.y)
 			for(let x=0; x<options.points.length; x++)
-				Canvas.context.lineTo(options.points[x][0],options.points[x][1])
+				Canvas.context.lineTo(options.points[x][0]+options.offset.x,options.points[x][1]+options.offset.y)
 
 			Canvas.context.closePath();
 			
@@ -730,6 +738,154 @@ document.addEventListener("DOMContentLoaded", function(){
 		this.setColor = (color)=>{
 			if(color == options.color) return;
 			options.color = color;
+			Canvas.update();
+		}
+
+		this.addPoint = (point)=>{
+			options.points.push(point);
+			Canvas.update();
+		}
+
+		this.removePoint = (index)=>{
+			if(Array.isArray(index)){
+				for(let x=0; x<options.points.length; x++)
+					if(options.points[x][0] == index[0] && options.points[x][1] == index[1]){
+						options.points.splice(x,1);
+						break;
+					}
+			}else
+				options.points.splice(index,1);
+			Canvas.update();
+		}
+
+		///Misc
+
+		this.draw = ()=>{
+			Canvas.shapes.push(this);
+			this.__draw__();
+		}
+
+		this.moveZ = (amt)=>{
+			amt = amt || 1;
+			let pos = Canvas.shapes.indexOf(this);
+			Canvas.shapes.splice(pos, 1);
+			Canvas.shapes.splice(pos + amt, 0, this)
+			Canvas.update();
+		}
+
+		this.getProperties = ()=>{
+			return PROPERTIES;
+		}
+	}
+
+	Text = function(options,op){
+		if(typeof options != "object"){
+			let t = options;
+			options = {
+				text: t
+			};
+		}else
+			options = options || {};
+
+		options.text = options.text || (op && op.text) || "Default";
+		options.color = options.color || (op && op.color) || DEFAULTS.color;
+		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
+		options.x = options.x || (op && op.x) || DEFAULTS.x;
+		options.y = options.y || (op && op.y) || DEFAULTS.y;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
+		options.font = options.font || (op && options.font) || "1em Helvetica";
+
+		Canvas.context.font = options.font;
+		options.width = Canvas.context.measureText(options.text).width;
+		options.height = Canvas.context.measureText(options.text).height;
+
+		let PROPERTIES = ['alpha','color','font','lineWidth','style','text','x','y'];
+
+		this.__draw__ = ()=>{
+			Canvas.context.beginPath();
+			Canvas.context.globalAlpha = options.alpha;
+
+			Canvas.context.font = options.font;
+			
+			if(options.style == "solid"){
+				Canvas.context.fillStyle = options.color;
+				Canvas.context.fillText(options.text,options.x,options.y);
+			}else if(options.style == "stroke"){
+				Canvas.context.lineWidth = options.lineWidth;
+				Canvas.context.strokeStyle = options.color;
+				Canvas.context.strokeText(options.text,options.x,options.y);
+			}
+
+			Canvas.context.closePath();
+			Canvas.context.globalAlpha = 1;
+			
+		}
+
+		///Accessors
+
+		this.get = (key)=>{
+			return options[key];
+		}
+
+		this.getAlpha = ()=>{
+			return options.alpha;
+		}
+
+		this.getColor = ()=>{
+			return options.color;
+		}
+
+		this.getHeight = ()=>{
+			return options.height;
+		}
+
+		this.getText = ()=>{
+			return options.text;
+		}
+
+		this.getWidth = ()=>{
+			return options.width;
+		}
+
+		this.getX = ()=>{
+			return options.x;
+		}
+
+		this.getY = ()=>{
+			return options.y;
+		}
+
+		///Mutators
+
+		this.set = (key,value)=>{
+			if(!PROPERTIES.includes(key) || options[key] == value) return;
+			options[key] = value;
+			Canvas.update();
+		}
+
+		this.setAlpha = (alpha)=>{
+			if(alpha == options.alpha) return;
+			options.alpha = alpha;
+			Canvas.update();
+		}
+
+		this.setColor = (color)=>{
+			if(color == options.color) return;
+			options.color = color;
+			Canvas.update();
+		}
+
+		this.setText = (text)=>{
+			if(text == options.text) return;
+			options.text = text;
+			Canvas.update();
+		}
+
+		this.setPosition = (x,y)=>{
+			if(x == options.x && y == options.y) return;
+			options.x = x;
+			options.y = y;
 			Canvas.update();
 		}
 
