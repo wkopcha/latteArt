@@ -1,4 +1,4 @@
-var Arc, Circle, Canvas, Line, Polygon, Rectangle, Regular, Text;
+var Arc, Circle, Canvas, Elipse, Line, Polygon, Rectangle, Regular, Text;
 
 document.addEventListener("DOMContentLoaded", function(){
 
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		}else
 			options = options || {};
 
-		options.radius = options.radius || (op && op.radius) || Defaults.radius;
+		options.radius = options.radius || (op && op.radius) || DEFAULTS.radius;
 		options.color = options.color || (op && op.color) || DEFAULTS.color;
 		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
 		options.x = options.x || (op && op.x) || DEFAULTS.x;
@@ -295,6 +295,139 @@ document.addEventListener("DOMContentLoaded", function(){
 		}
 	}
 
+	Elipse = function(options,yRadius,op){
+		if(typeof options != "object"){
+			let r = options;
+			options = {
+				xRadius: r
+			};
+		}else
+			options = options || {};
+
+		options.xRadius = options.xRadius || (op && op.xRadius) || DEFAULTS.radius;
+		options.yRadius = options.yRadius || (op && op.yRadius) || DEFAULTS.radius;
+		options.angle = options.angle || (op && op.angle) || DEFAULTS.startAngle;
+		options.color = options.color || (op && op.color) || DEFAULTS.color;
+		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
+		options.x = options.x || (op && op.x) || DEFAULTS.x;
+		options.y = options.y || (op && op.y) || DEFAULTS.y;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
+
+		let PROPERTIES = ['alpha','angle','color','lineWidth','style','x','xRadius','y','yRadius'];
+
+		this.__draw__ = ()=>{
+			Canvas.context.beginPath();
+			Canvas.context.globalAlpha = options.alpha;
+
+			Canvas.context.ellipse(options.x, options.y, options.xRadius, options.yRadius, -options.angle, 0, 2*Math.PI);
+
+			Canvas.context.closePath();
+			
+			if(options.style == "solid"){
+				Canvas.context.fillStyle = options.color;
+				Canvas.context.fill();
+			}else if(options.style == "stroke"){
+				Canvas.context.lineWidth = options.lineWidth;
+				Canvas.context.strokeStyle = options.color;
+				Canvas.context.stroke();
+			}
+
+			Canvas.context.globalAlpha = 1;
+			
+		}
+
+		///Accessors
+
+		this.get = (key)=>{
+			return options[key];
+		}
+
+		this.getAlpha = ()=>{
+			return options.alpha;
+		}
+
+		this.getAngle = ()=>{
+			return options.angle;
+		}
+
+		this.getColor = ()=>{
+			return options.color;
+		}
+
+		this.getRadius = (angle)=>{
+			return Math.sqrt(Math.pow(options.xRadius*Math.cos(options.angle),2) + Math.pow(options.yRadius*Math.sin(options.angle),2));
+		}
+
+		this.getX = ()=>{
+			return options.x;
+		}
+
+		this.getXRadius = ()=>{
+			return options.xRadius;
+		}
+
+		this.getY = ()=>{
+			return options.y;
+		}
+
+		this.getYRadius = ()=>{
+			return options.yRadius;
+		}
+
+		///Mutators
+
+		this.set = (key,value)=>{
+			if(!PROPERTIES.includes(key) || options[key] == value) return;
+			options[key] = value;
+			Canvas.update();
+		}
+
+		this.setAlpha = (alpha)=>{
+			if(alpha == options.alpha) return;
+			options.alpha = alpha;
+			Canvas.update();
+		}
+
+		this.setAngle = (angle)=>{
+			if(angle == options.angle) return;
+			options.angle = angle;
+			Canvas.update();
+		}
+
+		this.setColor = (color)=>{
+			if(color == options.color) return;
+			options.color = color;
+			Canvas.update();
+		}
+
+		this.setPosition = (x,y)=>{
+			if(x == options.x && y == options.y) return;
+			options.x = x;
+			options.y = y;
+			Canvas.update();
+		}
+
+		///Misc
+
+		this.draw = ()=>{
+			Canvas.shapes.push(this);
+			this.__draw__();
+		}
+
+		this.moveZ = (amt)=>{
+			amt = amt || 1;
+			let pos = Canvas.shapes.indexOf(this);
+			Canvas.shapes.splice(pos, 1);
+			Canvas.shapes.splice(pos + amt, 0, this)
+			Canvas.update();
+		}
+
+		this.getProperties = ()=>{
+			return PROPERTIES;
+		}
+	}
+
 	Arc = function(options,startAngle,endAngle,op){
 		if(typeof options != "object"){
 			let r = options;
@@ -321,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function(){
 			Canvas.context.beginPath();
 			Canvas.context.globalAlpha = options.alpha;
 
-			Canvas.context.arc(options.x, options.y, options.radius, options.startAngle, options.endAngle);
+			Canvas.context.arc(options.x, options.y, options.radius, -options.startAngle, -options.endAngle, true);
 
 			if(!options.connect)
 				Canvas.context.moveTo(options.x+Math.cos(options.startAngle)*options.radius, options.y+Math.sin(options.startAngle)*options.radius)
@@ -420,6 +553,145 @@ document.addEventListener("DOMContentLoaded", function(){
 		}
 	}
 
+	ElipseArc = function(options,yRadius,startAngle,endAngle,op){
+		if(typeof options != "object"){
+			let r = options;
+			options = {
+				xRadius: r
+			};
+		}else
+			options = options || {};
+
+		options.xRadius = options.xRadius || (op && op.xRadius) || DEFAULTS.radius;
+		options.yRadius = options.yRadius || (op && op.yRadius) || DEFAULTS.radius;
+		options.angle = options.angle || (op && op.angle) || DEFAULTS.startAngle;
+		options.color = options.color || (op && op.color) || DEFAULTS.color;
+		options.alpha = options.alpha || (op && op.alpha) || DEFAULTS.alpha;
+		options.x = options.x || (op && op.x) || DEFAULTS.x;
+		options.y = options.y || (op && op.y) || DEFAULTS.y;
+		options.style = options.style || (op && op.style) || DEFAULTS.style;
+		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
+		options.startAngle = options.startAngle || startAngle || (op && op.startAngle) || DEFAULTS.startAngle;
+		options.endAngle = options.endAngle || endAngle || (op && op.endAngle) || DEFAULTS.endAngle;
+		options.connect = options.connect || (op && op.connect) || false;
+
+		let PROPERTIES = ['alpha','angle','color','lineWidth','style','x','xRadius','y','yRadius'];
+
+		this.__draw__ = ()=>{
+			Canvas.context.beginPath();
+			Canvas.context.globalAlpha = options.alpha;
+
+			Canvas.context.ellipse(options.x, options.y, options.xRadius, options.yRadius, -options.angle, -options.startAngle, -options.endAngle);
+
+			if(!options.connect)
+				Canvas.context.moveTo(options.x+Math.cos(options.startAngle+options.angle)*options.xRadius, options.y+Math.sin(options.startAngle+options.angle)*options.yRadius)
+
+			Canvas.context.closePath();
+			
+			if(options.style == "solid"){
+				Canvas.context.fillStyle = options.color;
+				Canvas.context.fill();
+			}else if(options.style == "stroke"){
+				Canvas.context.lineWidth = options.lineWidth;
+				Canvas.context.strokeStyle = options.color;
+				Canvas.context.stroke();
+			}
+
+			Canvas.context.globalAlpha = 1;
+			
+		}
+
+		///Accessors
+
+		this.get = (key)=>{
+			return options[key];
+		}
+
+		this.getAlpha = ()=>{
+			return options.alpha;
+		}
+
+		this.getAngle = ()=>{
+			return options.angle;
+		}
+
+		this.getColor = ()=>{
+			return options.color;
+		}
+
+		this.getRadius = (angle)=>{
+			return Math.sqrt(Math.pow(options.xRadius*Math.cos(angle),2) + Math.pow(options.yRadius*Math.sin(angle),2));
+		}
+
+		this.getX = ()=>{
+			return options.x;
+		}
+
+		this.getXRadius = ()=>{
+			return options.xRadius;
+		}
+
+		this.getY = ()=>{
+			return options.y;
+		}
+
+		this.getYRadius = ()=>{
+			return options.yRadius;
+		}
+
+		///Mutators
+
+		this.set = (key,value)=>{
+			if(!PROPERTIES.includes(key) || options[key] == value) return;
+			options[key] = value;
+			Canvas.update();
+		}
+
+		this.setAlpha = (alpha)=>{
+			if(alpha == options.alpha) return;
+			options.alpha = alpha;
+			Canvas.update();
+		}
+
+		this.setAngle = (angle)=>{
+			if(angle == options.angle) return;
+			options.angle = angle;
+			Canvas.update();
+		}
+
+		this.setColor = (color)=>{
+			if(color == options.color) return;
+			options.color = color;
+			Canvas.update();
+		}
+
+		this.setPosition = (x,y)=>{
+			if(x == options.x && y == options.y) return;
+			options.x = x;
+			options.y = y;
+			Canvas.update();
+		}
+
+		///Misc
+
+		this.draw = ()=>{
+			Canvas.shapes.push(this);
+			this.__draw__();
+		}
+
+		this.moveZ = (amt)=>{
+			amt = amt || 1;
+			let pos = Canvas.shapes.indexOf(this);
+			Canvas.shapes.splice(pos, 1);
+			Canvas.shapes.splice(pos + amt, 0, this)
+			Canvas.update();
+		}
+
+		this.getProperties = ()=>{
+			return PROPERTIES;
+		}
+	}
+
 	Regular = function(options,radius,op){
 		if(typeof options != "object"){
 			let c = options;
@@ -475,6 +747,10 @@ document.addEventListener("DOMContentLoaded", function(){
 			return options.alpha;
 		}
 
+		this.getAngle = ()=>{
+			return options.angle;
+		}
+
 		this.getColor = ()=>{
 			return options.color;
 		}
@@ -506,6 +782,12 @@ document.addEventListener("DOMContentLoaded", function(){
 		this.setAlpha = (alpha)=>{
 			if(alpha == options.alpha) return;
 			options.alpha = alpha;
+			Canvas.update();
+		}
+
+		this.setAngle = (angle)=>{
+			if(angle == options.angle) return;
+			options.angle = angle;
 			Canvas.update();
 		}
 
@@ -671,8 +953,8 @@ document.addEventListener("DOMContentLoaded", function(){
 		options.style = options.style || (op && op.style) || DEFAULTS.style;
 		options.lineWidth = options.lineWidth || (op && op.lineWidth) || DEFAULTS.lineWidth;
 		options.offset = options.offset || (op && op.offset) || {};
-		options.offset.x = options.offset.x || (op && op.offset.x) || DEFAULTS.x;
-		options.offset.y = options.offset.y || (op && op.offset.y) || DEFAULTS.y;
+		options.x = options.x || (op && op.x) || DEFAULTS.x;
+		options.y = options.y || (op && op.y) || DEFAULTS.y;
 
 		let PROPERTIES = ['alpha','color','lineWidth','offset','points','style'];
 
@@ -680,9 +962,9 @@ document.addEventListener("DOMContentLoaded", function(){
 			Canvas.context.beginPath();
 			Canvas.context.globalAlpha = options.alpha;
 
-			Canvas.context.moveTo(options.points[0][0]+options.offset.x,options.points[0][1]+options.offset.y)
+			Canvas.context.moveTo(options.points[0][0]+options.x,options.points[0][1]+options.y)
 			for(let x=0; x<options.points.length; x++)
-				Canvas.context.lineTo(options.points[x][0]+options.offset.x,options.points[x][1]+options.offset.y)
+				Canvas.context.lineTo(options.points[x][0]+options.x,options.points[x][1]+options.y)
 
 			Canvas.context.closePath();
 			
@@ -755,6 +1037,13 @@ document.addEventListener("DOMContentLoaded", function(){
 					}
 			}else
 				options.points.splice(index,1);
+			Canvas.update();
+		}
+
+		this.setPosition = (x,y)=>{
+			if(x == options.x && y == options.y) return;
+			options.x = x;
+			options.y = y;
 			Canvas.update();
 		}
 

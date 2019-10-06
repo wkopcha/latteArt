@@ -93,10 +93,25 @@
 
 				let t = new Text({
 					text: "Game Over",
-					font: "48px Roboto"
+					font: "48pt Roboto"
 				});
 				t.setPosition(CONSTS.screen.x/2 - t.getWidth()/2,100);
 				t.draw();
+
+				t = new Text({
+					text: TURNS,
+					font: "56pt Roboto"
+				});
+				t.setPosition(CONSTS.screen.x/2 - t.getWidth()/2,250);
+				t.draw();
+
+				t = new Text({
+					text: "Turns",
+					font: "21pt Roboto"
+				});
+				t.setPosition(CONSTS.screen.x/2 - t.getWidth()/2,300);
+				t.draw();
+
 
 				$(document).unbind('keydown');
 			}

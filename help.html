@@ -3,6 +3,7 @@
 	<head>
 		<title>Latte Art Documentation</title>
 		<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+		<script src='latteArt.js'></script>
 		<meta charset="UTF-8">
 		<style>
 		body{
@@ -129,7 +130,7 @@
 										x: DEFS.x,
 										y: DEFS.y
 									},
-									desc: 'Set the position of the arc to (<code>x</code>,<code>y</code>)'
+									desc: 'Set the center point of the arc to (<code>x</code>,<code>y</code>)'
 								}
 							],
 							misc: [
@@ -183,7 +184,146 @@
 										x: DEFS.x,
 										y: DEFS.y
 									},
-									desc: 'Set the position of the circle to (<code>x</code>,<code>y</code>)'
+									desc: 'Set the center point of the circle to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					Elipse: {
+						desc: "Used to draw an elipse",
+						constructors: [
+							{
+								args: {
+									xRadius: "Radius of the x axis of the elipse",
+									yRadius: "Radius of the y axis of the elipse",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							angle: "The angle the elipse is rotated (radians, 0 = right)",
+							color: DEFS.color,
+							lineWidth: DEFS.lineWidth,
+							style: DEFS.style,
+							x: DEFS.x,
+							xRadius: "Radius of the x axis of the elipse",
+							y: DEFS.y,
+							yRadius: "Radius of the y axis of the elipse"
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'angle',
+								'color',
+								{
+									name: 'getRadius',
+									args: {
+										angle: 'The angle to measure radius'
+									},
+									desc: 'Return the radius at angle <code>angle</code>'
+								},
+								'x',
+								'xRadius',
+								'y',
+								'yRadius'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'angle',
+								'color',
+								'radius',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the center point of the circle to (<code>x</code>,<code>y</code>)'
+								}
+							],
+							misc: [
+								'draw',
+								'moveZ',
+								'getProperties'
+							]
+						}
+					},
+					ElipseArc: {
+						desc: "Used to draw an elipse",
+						constructors: [
+							{
+								args: {
+									xRadius: "Radius of the x axis of the elipse",
+									yRadius: "Radius of the y axis of the elipse",
+									startAngle: "Angle the arc starts at (radians, 0 = right)",
+									endAngle: "Angle the arc ends at (radians, 0 = right)",
+									options: DEFS.options
+								}
+							},
+							{
+								args: {
+									options: DEFS.options
+								}
+							}
+						],
+						properties: {
+							alpha: DEFS.alpha,
+							angle: "The angle the arc is rotated (radians, 0 = right)",
+							color: DEFS.color,
+							connect: "Boolean to tell if to connect the two endpoints of the arc (true = yes)",
+							endAngle: "Angle the arc ends at (radians, 0 = right)",
+							lineWidth: DEFS.lineWidth,
+							startAngle: "Angle the arc starts at (radians, 0 = right)",
+							style: DEFS.style,
+							x: DEFS.x,
+							xRadius: "Radius of the x axis of the elipse",
+							y: DEFS.y,
+							yRadius: "Radius of the y axis of the elipse"
+						},
+						functions: {
+							accessors: [
+								'all',
+								'alpha',
+								'angle',
+								'color',
+								{
+									name: 'getRadius',
+									args: {
+										angle: 'The angle to measure radius'
+									},
+									desc: 'Return the radius at angle <code>angle</code>'
+								},
+								'x',
+								'xRadius',
+								'y',
+								'yRadius'
+							],
+							mutators: [
+								'all',
+								'alpha',
+								'angle',
+								'color',
+								'radius',
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the center point of the circle to (<code>x</code>,<code>y</code>)'
 								}
 							],
 							misc: [
@@ -257,9 +397,10 @@
 							alpha: DEFS.alpha,
 							color: DEFS.color,
 							lineWidth: DEFS.lineWidth,
-							offset: "Object {x: ... , y: ...} to describe the offset of the first point of the shape",
 							points: "Array of array ordered pairs ([x,y]) used to define the shape",
-							style: DEFS.style
+							style: DEFS.style,
+							x: DEFS.x,
+							y: DEFS.y
 						},
 						functions: {
 							accessors: [
@@ -303,7 +444,15 @@
 										index: 'Index of array ordered pair to remove'
 									},
 									desc: "Removes a point at index from the points array"
-								}
+								},
+								{
+									name: 'setPosition',
+									args: {
+										x: DEFS.x,
+										y: DEFS.y
+									},
+									desc: 'Set the first point of the shape to (<code>x</code>,<code>y</code>)'
+								},
 							],
 							misc: [
 								'draw',
@@ -367,7 +516,7 @@
 										x: DEFS.x,
 										y: DEFS.y
 									},
-									desc: 'Set the position of the rectangle to (<code>x</code>,<code>y</code>)'
+									desc: 'Set the top left point of the rectangle to (<code>x</code>,<code>y</code>)'
 								},
 								'width'
 							],
@@ -409,6 +558,7 @@
 							accessors: [
 								'all',
 								'alpha',
+								'angle',
 								'color',
 								'count',
 								'radius',
@@ -418,6 +568,7 @@
 							mutators: [
 								'all',
 								'alpha',
+								'angle',
 								'color',
 								'radius',
 								{
@@ -426,7 +577,7 @@
 										x: DEFS.x,
 										y: DEFS.y
 									},
-									desc: 'Set the position of the circle to (<code>x</code>,<code>y</code>)'
+									desc: 'Set the center point of the polygon to (<code>x</code>,<code>y</code>)'
 								}
 							],
 							misc: [
@@ -483,7 +634,7 @@
 										x: DEFS.x,
 										y: DEFS.y
 									},
-									desc: 'Set the position of the rectangle to (<code>x</code>,<code>y</code>)'
+									desc: 'Set the position of the text to (<code>x</code>,<code>y</code>)'
 								}
 							],
 							misc: [
@@ -608,12 +759,48 @@
 						$(this).prev().html("&#9654;");
 					}
 				});
+
+				new ElipseArc({
+					x: 266,
+					y: 166, //166
+					startAngle: 2*Math.PI/6,
+					endAngle: -2*Math.PI/3,
+					color: "#ddd",
+					xRadius: 50,
+					yRadius: 30,
+					lineWidth: 20,
+					style: "stroke"
+				}).draw();
+
+				new Arc({
+					radius: 150,
+					x: 150,
+					y: 100,
+					style: "solid",
+					startAngle: Math.PI,
+					endAngle: Math.PI*2,
+					color:"#ddd"
+				}).draw();
+
+				new Elipse({
+					x: 150,
+					y: 100,
+					color: "#eebc77",
+					xRadius: 150,
+					yRadius: 80
+				}).draw();
+
+				/**
+				draw art in coffee
+				*/
+
+
 			});
 		</script>
 	</head>
 	<body>
 		<div id="container">
-			<span style='font-size:3em'>Latte Art <a href='https://github.com/wkopcha/latteArt' style='font-size:0.333em;font-weight:bold' target='tab'>GitHub</a></span>
+			<span style='font-size:3em'>Latte Art <a href='https://github.com/wkopcha/latteArt' style='font-size:0.333em;font-weight:bold' target='tab'>GitHub</a></span><canvas id='latte-art-container' style="float:right;height:7em;width:7em" width=400 height=400></canvas>
 		</div>
 	</body>
 </html>
