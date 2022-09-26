@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Islands</title>
+		<meta charset=UTF-8>
+		<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+		<script src='../latteart.js'></script>
+		<script>
+			const SETTINGS = {
+				VERSION: 0,
+				WORLD: {
+					x: 1400,
+					y: 800
+				},
+				islands: {
+					count: 4,
+					radius: {
+						min: 100,
+						max: 200
+					},
+					pointCount: {
+						min: 5,
+						max: 8
+					},
+					variationCap: 75,
+					color: '#fac893'
+				},
+				water: {
+					color: '#63d6eb' //'#93ebfa'
+				},
+				player: {
+					radius: 5,
+					decceleration: {
+						water: 0.07,
+						island: 0.15
+					},
+					velocity: {
+						min: 0.1,
+						step: 1,
+						b: 0.05,
+						c: 10
+					},
+					deccel: {
+						b: -2.3,
+						c: 0.25
+					},
+					color: '#000'
+				}
+			};
+
+			var KEYS_PRESSED = [];
+			var ISLANDS = [];
+			var PLAYER;
+			var KEYS = {
+				left: 65,
+				up: 83,
+				down: 87,
+				right: 68
+			}
+
+			$(() => {
+				console.log("Running version "+SETTINGS.VERSION);
+				init();
+			});
+
+
+			function init(){
+				//draw water
+				let water = new Rectangle({
+					width: SETTINGS.WORLD.x,
+					height: SETTINGS.WORLD.y,
+					x: 0,
+					y: 0,
+					color: SETTINGS.water.color
+				});
+				water.draw();
+
+				//generate the islands
+				for(let x=0; x<SETTINGS.islands.count; x++){
+					ISLANDS.push(new Island());
+				}
+
+				PLAYER = new Player();
+				window.setTimeout(update, 10);
+
+				$(document).keydown((e)=>{
+					switch(e.which){
+						case KEYS.left: //Left
+							KEYS_PRESSED.left = true;
+							break;
+						case KEYS.down: //Down
+							KEYS_PRESSED.down = true;
+							break;
+						case KEYS.right: //Right
+							KEYS_PRESSED.right = true;
+							break;
+						case KEYS.up: //Up
+							KEYS_PRESSED.up = true;
+							break;
+						default:
+							return;
+					}
+				});
+
+				$(document).keyup((e)=>{
+					switch(e.which){
+						case KEYS.left: //Left
+							KEYS_PRESSED.left = false;
+							break;
+						case KEYS.down: //Down
+							KEYS_PRESSED.down = false;
+							break;
+						case KEYS.right: //Right
+							KEYS_PRESSED.right = false;
+							break;
+						case KEYS.up: //Up
+							KEYS_PRESSED.up = false;
+							break;
+						default:
+							return;
+					}
+				});
+			}
+
+			function update(){
+				if(!$('#game-running').prop('checked')) return;
+				PLAYER.move();
+				if(PLAYER.inWater){
+					ISLANDS.forEach(i => {
+						if(PLAYER.inIsland(i))
+							PLAYER.inWater = false;
+					});
+				}else if(!PLAYER.inWater){
+					PLAYER.inWater = true;
+					ISLANDS.forEach(i => {
+						if(PLAYER.inIsland(i))
+							PLAYER.inWater = false;
+					});
+				}
+
+				let angle = "";
+				if(KEYS_PRESSED.up)
+					PLAYER.addVel(0,SETTINGS.player.velocity.step);
+				if(KEYS_PRESSED.right)
+					PLAYER.addVel(SETTINGS.player.velocity.step,0);
+				if(KEYS_PRESSED.down)
+					PLAYER.addVel(0,-SETTINGS.player.velocity.step);
+				if(KEYS_PRESSED.left)
+					PLAYER.addVel(-SETTINGS.player.velocity.step,0);
+
+				if(!PLAYER.stationary())
+					PLAYER.slow();
+
+				if(!PLAYER.inWater)
+					PLAYER.c.set('color','#f00');
+				else if(PLAYER.c.get('color') != SETTINGS.player.color)
+					PLAYER.c.set('color', SETTINGS.player.color);
+				window.setTimeout(update, 10);
+			}
+
+			function Vector(...points){
+
+				let dimension = points.length;
+
+				this.get = (x) => {
+					return points[x];
+				}
+				this.getDimension = () => {
+					return dimension;
+				}
+
+				this.calculateSpeed = function(vector){
+					let total = 0;
+					for(let x=0; x<vector.getDimension(); x++)
+						total += vector.get(x)**2;
+					return total**(1/vector.getDimension());
+				}
+			}
+
+
+			function Island(){
+				let radius = Math.random() * SETTINGS.islands.radius.min + (SETTINGS.islands.radius.max - SETTINGS.islands.radius.min);
+				let pointCount = Math.random() * SETTINGS.islands.pointCount.min + (SETTINGS.islands.pointCount.max - SETTINGS.islands.pointCount.min) + 1;
+
+				this.points = [];
+				let position = {
+					x: radius + SETTINGS.islands.variationCap + Math.random()*(SETTINGS.WORLD.x - 2*(radius - SETTINGS.islands.variationCap)),
+					y: radius + SETTINGS.islands.variationCap + Math.random()*(SETTINGS.WORLD.y - 2*(radius - SETTINGS.islands.variationCap))
+				};
+				let thetaStep = Math.PI*2 / pointCount;
+				let initTheta = Math.random() * Math.PI*2;
+				let pointRadius;
+				for(let x=0; x<pointCount; x++){
+					pointRadius = (radius + (Math.random()>0.5 ? -1 : 1)*Math.random()*SETTINGS.islands.variationCap);
+					this.points.push([
+						pointRadius*Math.cos(thetaStep*x + initTheta),
+						pointRadius*Math.sin(thetaStep*x + initTheta)
+					]);
+				}
+
+				this.shape = new Polygon({
+					points: this.points,
+					x: position.x,
+					y: position.y,
+					color: SETTINGS.islands.color
+				});
+				this.shape.draw();
+
+				this.getPosition = (dimension) => {
+					return (dimension in position ? position[dimension] : 0);
+				}
+
+				this.getRadius = () => { return radius }
+			}
+
+			function Player(){
+				this.inWater = true;
+				let velocity = [0,0];
+				let uncompressedVelocity = [0,0];
+
+				this.stationary = ()=>{
+					return velocity[0] == velocity[1] && velocity[0] == 0;
+				}
+
+				this.slow = () => {
+					let v = Math.sqrt(velocity[0]**2 + velocity[1]**2);
+					let deccel = (this.inWater ? SETTINGS.player.decceleration.water : SETTINGS.player.decceleration.island);
+					if(v < SETTINGS.player.velocity.min && v > -SETTINGS.player.velocity.min)
+						return velocity = [0,0];
+					velocity[0] = velocity[0] / v * (v-deccel);
+					velocity[1] = velocity[1] / v * (v-deccel);
+					uncompressedVelocity[0] = uncompressedVelocity[0] / v * (v-deccel);
+					uncompressedVelocity[1] = uncompressedVelocity[1] / v * (v-deccel);
+				}
+
+				this.addVel = (xModif, yModif) => {
+					uncompressedVelocity[0]+=xModif;
+					uncompressedVelocity[1]+=yModif;
+					velocity[0] = calcVel(uncompressedVelocity[0], xModif);
+					velocity[1] = calcVel(uncompressedVelocity[1], yModif);
+
+					function calcVel(prevVel, modif){
+						// logistic growth
+						return (SETTINGS.player.velocity.c / (1 + Math.E**(-SETTINGS.player.velocity.b * (prevVel+modif)))) - SETTINGS.player.velocity.c/2;
+					}
+				}
+
+				this.move = () => {
+					this.position[0] = this.position[0] + velocity[0];
+					this.position[1] = this.position[1] + velocity[1];
+					if(this.position[0] > SETTINGS.WORLD.x) this.position[0] = SETTINGS.WORLD.x, velocity[0] = 0;
+					if(this.position[1] > SETTINGS.WORLD.y) this.position[1] = SETTINGS.WORLD.y, velocity[1] = 0;
+					if(this.position[0] < 0) this.position[0] = 0, velocity[0] = 0;
+					if(this.position[1] < 0) this.position[1] = 0, velocity[1] = 0;
+					this.c.setPosition(this.position[0], this.position[1]);
+				}
+
+				this.position = [
+					Math.random() * SETTINGS.WORLD.x,
+					Math.random() * SETTINGS.WORLD.y
+				];
+
+				this.c = new Circle({
+					radius: SETTINGS.player.radius,
+					x: this.position[0],
+					y: this.position[1]
+				});
+				this.c.draw();
+
+				this.inIsland = (island) => {
+					//check if player is outside of maximum island radius
+					let playerRadius = Math.sqrt((this.position[0] - island.getPosition('x'))**2 + (this.position[1] - island.getPosition('y'))**2);
+					let maxRadius = island.getRadius() + SETTINGS.islands.variationCap;
+					if(playerRadius > maxRadius) return false;
+
+					//get which quadrant the player is in
+					let isRight = island.getPosition('x') - this.position[0] < 0;
+					let isAbove = this.position[1] - island.getPosition('y') < 0;
+					let quadrant;
+					if(isAbove && isRight) quadrant = 1;
+					if(isAbove && !isRight) quadrant = 2;
+					if(!isAbove && !isRight) quadrant = 3;
+					if(!isAbove && isRight) quadrant = 4;
+
+					//check triangles for that quadrant
+					let foundQuadrant = false;
+					let checkPoints = [];
+					let ref = [island.getPosition('x'), island.getPosition('y')];
+					for(let x=0; x<island.points.length; x++)
+						checkPoints.push([island.points[x][0] + ref[0], island.points[x][1] + ref[1]]);
+
+					for(let x=0; x<checkPoints.length; x++)
+						if(inTriangle(this.position, ref, checkPoints[x], checkPoints[(x+1)%checkPoints.length]))
+							return true;
+					return false
+
+					function inTriangle(target, p1, p2, p3){
+						let totalArea = area(p1, p2, p3);
+						let a1 = area(target, p2, p3);
+						let a2 = area(p1, target, p3);
+						let a3 = area(p1, p2, target);
+						return Math.round(totalArea) == Math.round(a1+a2+a3);
+
+
+						function area(p1, p2, p3){
+							let a = Math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2);
+							let b = Math.sqrt((p1[0] - p3[0])**2 + (p1[1] - p3[1])**2);
+							let c = Math.sqrt((p3[0] - p2[0])**2 + (p3[1] - p2[1])**2);
+							let s = 0.5 * (a+b+c);
+							return Math.sqrt(s * (s-a) * (s-b) * (s-c));
+						}
+					}
+
+					function inQuadrant(q, ref, point){
+						let p = [
+							point[0] - ref[0],
+							point[1] - ref[1]
+						];
+						switch(q){
+							case 1:
+								return p[0] >= 0 && p[1] <= 0;
+							case 2:
+								return p[0] < 0 && p[1] <= 0;
+							case 3:
+								return p[0] < 0 && p[1] > 0;
+							case 4:
+								return p[0] >= 0 && p[1] > 0;
+						}
+						return false;
+					}
+				}
+			}
+		</script>
+		<style>
+			#latte-art-container{
+				border: 1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id='latte-art-container' width=1400 height=800></canvas>
+		<input type='checkbox' checked id='game-running'>
+		Use WASD to move
+	</body>
+</html>
