@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src='../latte-art.js'></script>
+		<script>
+			window.onload = () => {
+				let canvas = LatteArt.getCanvas('container');
+				// If setting up the canvas failed, stop
+				if(!canvas)
+					return;
+
+				LatteArt.defaults.lineJoin = 'round';
+				LatteArt.defaults.text.font = '5em sans-serif';
+
+				canvas.clearColor = '#b1dadd';
+
+				let rect = canvas.createRect({
+					x: 100,
+					y: 400,
+					width: 300,
+					height: 200,
+					style: 'green',
+					lineWidth: 10,
+					isHollow: true
+				});
+
+				let rect2 = canvas.createRect({
+					width: 300,
+					height: 200,
+					style: 'blue'
+				});
+
+				let reg = canvas.createRegular({
+					x: 250,
+					y: 250,
+					sideCount: 7,
+					radius: 200,
+					isHollow: true,
+					lineWidth: 20
+				});
+
+				let text = canvas.createText(500, 400, 'Hello World~');
+
+				let poly = canvas.createPolygon({
+					x: 500,
+					y: 200,
+					points: [
+						[0, 0],
+						[0, 100],
+						[100, 0]
+					],
+					isHollow: true,
+					lineWidth: 10
+				});
+
+				canvas.draw();
+			};
+		</script>
+	</head>
+	<body>
+		<canvas
+			id='container'
+			width=1000
+			height=750
+			style="
+				border: 1px solid black;
+				width: 1000px;
+				height: 750px;
+				float: left;
+			">
+		</canvas>
+	</body>
+</html>

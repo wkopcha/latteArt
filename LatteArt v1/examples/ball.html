@@ -1,0 +1,97 @@
+<!doctype HTML>
+<html>
+	<head>
+		<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+		<script src='../latteArt.js'></script>
+		<script>
+			/****************
+			 * GRAPHICS BY: *
+			 * Latte Art    *
+			 ****************/
+
+			$(()=>{
+				init();
+			})
+
+			const CONSTS = {
+				initVelocity: 5,
+				deflectionLoss: 0.10,
+				acceleration: 60,
+				xVel: 40,
+				delay: 32,
+				timeMod: 0.1,
+
+				radiusDist: 3,
+
+
+				screenWidth: 1000,
+				screenHeight: 750
+			};
+
+			let ID;
+			let T = 0;
+			let BOUNCE_STATE = 0;
+
+			function init(){
+				Canvas.context.clearRect(0,0,this.width,this.height);
+
+				ID = setInterval(update, CONSTS.delay, new Ball(0,0,CONSTS.initVelocity));
+			}
+
+			function update(b){
+				
+				if(b.x >= CONSTS.screenWidth-b.c.getXRadius()){
+					console.log("Done");
+					clearInterval(ID);
+					console.log(b.x+" "+b.y);
+					console.log(b.c.getXRadius());
+				}
+
+
+				if(b.y >= CONSTS.screenHeight-b.c.getYRadius()){
+					b.move(b.x,CONSTS.screenHeight-b.c.getYRadius())
+					b.v = -Math.abs(b.v)*(1-CONSTS.deflectionLoss)
+					BOUNCE_STATE = 5;
+				}
+
+				b.move(
+					b.x + CONSTS.xVel * CONSTS.timeMod,
+					b.y + (b.v + CONSTS.acceleration*.5) * CONSTS.timeMod
+				);
+
+				b.c.set('yRadius', 12 + Math.abs(b.v)/50);
+				b.c.set('xRadius', 12 + CONSTS.xVel/50);
+
+				if(BOUNCE_STATE > 0) BOUNCE_STATE += 1 * CONSTS.timeMod;
+				b.v += CONSTS.acceleration * CONSTS.timeMod;
+			}
+
+			function Ball(x,y,initVel){
+				this.x = x;
+				this.y = y;
+				this.c = new Elipse({
+					xRadius: 12,
+					yRadius: 12,
+					x: x,
+					y: y,
+					color: "#f00",
+				});
+				this.c.draw();
+
+				this.initVel = initVel;
+				this.v = initVel;
+
+				this.move = (x,y)=>{
+					this.c.setPosition(x,y);
+					this.x = x;
+					this.y = y;
+				}
+			}
+			
+		</script>
+	</head>
+	<body>
+		<canvas id="latte-art-container" width=1000 height=750 style="border:1px solid black; width:1000px; height:750px;float:left;">
+		</canvas>
+	</body>
+</html>
